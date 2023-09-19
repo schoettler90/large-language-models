@@ -3,77 +3,66 @@ from dotenv import load_dotenv
 
 import torch
 import transformers
+from transformers import AutoModel, AutoTokenizer
 
 
 def main():
+    load_dotenv()
+    access_token = os.getenv("HUGGINGFACE_WRITE")
     # model_path = "tiiuae/falcon-7b-instruct"
     # model_path = 'meta-llama/Llama-2-7b-chat-hf'
-    model_path = 'meta-llama/Llama-2-13b-chat-hf'
+    # model_path = 'meta-llama/Llama-2-13b-chat-hf'
+    model_path = r"../models/Llama-2-7b-chat-hf"
 
-    tokenizer = transformers.AutoTokenizer.from_pretrained(model_path)
-    pipeline = transformers.pipeline(
-        "text-generation",
-        model=model_path,
-        tokenizer=tokenizer,
+    tokenizer = transformers.AutoTokenizer.from_pretrained(model_path, device_map="cuda:0", token=access_token)
+    model = transformers.AutoModelForCausalLM.from_pretrained(
+        model_path,
         torch_dtype=torch.bfloat16,
         trust_remote_code=True,
-        device_map="auto",
-    )
+        device_map="cuda:0",
+        token=access_token)
 
-    print("Pipeline:")
-    print(pipeline.model)
+    print("Model:")
+    print(model)
 
-    # print on which device the model is running
-    print("Device:", pipeline.device)
-
-    input_text = "What is the recipe for spaghetti bolognese?"
-
-    sequences = pipeline(
-        input_text,
+    # generate text
+    input_text = "Give me the recipe to cook spaghetti carbonara."
+    input_ids = tokenizer.encode(input_text, return_tensors="pt")
+    output = model.generate(
+        input_ids.cuda(),
         max_length=1000,
         do_sample=True,
         top_k=10,
         num_return_sequences=1,
-        eos_token_id=tokenizer.eos_token_id,
+        pad_token_id=tokenizer.eos_token_id,
     )
 
-    for seq in sequences:
-        print(f"Result: {seq['generated_text']}")
+    print(tokenizer.decode(output[0], skip_special_tokens=True))
 
 
-def load_model() -> transformers.Pipeline:
+def load_model():
     load_dotenv()
     access_token = os.getenv("HUGGINGFACE_WRITE")
-
     # model_path = "tiiuae/falcon-7b-instruct"
-    model_path = 'meta-llama/Llama-2-7b-chat-hf'
-    # model_path = 'meta-llama/Llama-2-13b-chat-hf
-    model_path = '../models/Llama-2-7b-chat-hf'
-    # model_path = '../models/Llama-2-13b-chat-hf'
+    # model_path = 'meta-llama/Llama-2-7b-chat-hf'
+    # model_path = 'meta-llama/Llama-2-13b-chat-hf'
+    model_path = r"../models/Llama-2-7b-chat-hf"
 
-    print("Loading model...")
-    print(f"Model name: {model_path}")
-
-    tokenizer = transformers.AutoTokenizer.from_pretrained(
+    tokenizer = transformers.AutoTokenizer.from_pretrained(model_path, device_map="cuda:0", token=access_token)
+    model = transformers.AutoModelForCausalLM.from_pretrained(
         model_path,
-        device_map="auto",
-        token=access_token,
-    )
-
-    pipeline = transformers.pipeline(
-        "text-generation",
-        model=model_path,
-        tokenizer=tokenizer,
         torch_dtype=torch.bfloat16,
         trust_remote_code=True,
-        device_map="auto",
-        token=access_token,
-    )
+        device_map="cuda:0",
+        token=access_token)
 
-    return pipeline
+    print("Model:")
+    print(model)
+
+    return model, tokenizer
 
 
-def chat_with_model(pipeline: transformers.Pipeline):
+def chat_with_model(model, tokenizer):
     print("Welcome! You can start a conversation by typing your message, or type 'exit' to end the conversation.")
 
     while True:
@@ -84,19 +73,25 @@ def chat_with_model(pipeline: transformers.Pipeline):
             print("Goodbye!")
             break
 
-        sequences = pipeline(
-            user_input,
+        # Encode the user's input and generate a response
+        input_ids = tokenizer.encode(user_input, return_tensors="pt")
+        output = model.generate(
+            input_ids.cuda(),
             max_length=1000,
             do_sample=True,
             top_k=10,
             num_return_sequences=1,
-            pad_token_id=pipeline.tokenizer.eos_token_id,
+            pad_token_id=tokenizer.eos_token_id,
         )
 
-        for seq in sequences:
-            print(f"Model: {seq['generated_text']}")
+        # Decode and print the model's response
+        print("Model:", tokenizer.decode(output[0], skip_special_tokens=True))
+
+
+def run_chatbot():
+    model, tokenizer = load_model()
+    chat_with_model(model, tokenizer)
 
 
 if __name__ == "__main__":
-    chatbot = load_model()
-    chat_with_model(chatbot)
+    run_chatbot()
