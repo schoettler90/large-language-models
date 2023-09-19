@@ -3,10 +3,9 @@ from dotenv import load_dotenv
 
 import torch
 import transformers
-from transformers import AutoModel, AutoTokenizer
 
 
-def main():
+def load_and_generate():
     load_dotenv()
     access_token = os.getenv("HUGGINGFACE_WRITE")
     # model_path = "tiiuae/falcon-7b-instruct"
@@ -46,9 +45,16 @@ def load_model():
     # model_path = "tiiuae/falcon-7b-instruct"
     # model_path = 'meta-llama/Llama-2-7b-chat-hf'
     # model_path = 'meta-llama/Llama-2-13b-chat-hf'
+    # model_path = r"../models/tiiuae/falcon-7b"
     model_path = r"../models/Llama-2-7b-chat-hf"
+    # model_path = r"../models/Llama-2-13b-chat-hf"
 
-    tokenizer = transformers.AutoTokenizer.from_pretrained(model_path, device_map="cuda:0", token=access_token)
+    tokenizer = transformers.AutoTokenizer.from_pretrained(
+        model_path,
+        device_map="cuda:0",
+        trust_remote_code=True,
+        token=access_token)
+
     model = transformers.AutoModelForCausalLM.from_pretrained(
         model_path,
         torch_dtype=torch.bfloat16,
