@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 import torch
 import transformers
 
+DEVICE = "cuda:0"
+
 
 def load_and_generate():
     load_dotenv()
@@ -18,7 +20,7 @@ def load_and_generate():
         model_path,
         torch_dtype=torch.bfloat16,
         trust_remote_code=True,
-        device_map="cuda:0",
+        device_map=DEVICE,
         token=access_token)
 
     print("Model:")
@@ -45,13 +47,13 @@ def load_model():
     # model_path = "tiiuae/falcon-7b-instruct"
     # model_path = 'meta-llama/Llama-2-7b-chat-hf'
     # model_path = 'meta-llama/Llama-2-13b-chat-hf'
-    # model_path = r"../models/tiiuae/falcon-7b"
-    model_path = r"../models/Llama-2-7b-chat-hf"
-    # model_path = r"../models/Llama-2-13b-chat-hf"
+    # model_path = r"D:\models\tiiuae\falcon-7b"
+    model_path = r"D:\models\Llama-2-7b-chat-hf"
+    # model_path = r"D:\models\Llama-2-13b-chat-hf"
 
     tokenizer = transformers.AutoTokenizer.from_pretrained(
         model_path,
-        device_map="cuda:0",
+        device_map=DEVICE,
         trust_remote_code=True,
         token=access_token)
 
@@ -59,7 +61,7 @@ def load_model():
         model_path,
         torch_dtype=torch.bfloat16,
         trust_remote_code=True,
-        device_map="cuda:0",
+        device_map=DEVICE,
         token=access_token)
 
     print("Model:")
@@ -80,9 +82,9 @@ def chat_with_model(model, tokenizer):
             break
 
         # Encode the user's input and generate a response
-        input_ids = tokenizer.encode(user_input, return_tensors="pt")
+        input_ids = tokenizer.encode(user_input, return_tensors="pt").cuda()
         output = model.generate(
-            input_ids.cuda(),
+            input_ids,
             max_length=1000,
             do_sample=True,
             top_k=10,
