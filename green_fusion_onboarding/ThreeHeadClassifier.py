@@ -1,12 +1,3 @@
-"""
-Create a pytorch model that takes in a sentence embedding and outputs 3 values:
-- a score for the first label
-- a score for the second label
-- a score for the third label
-
-The model should be trained on the data in data/sensors_example.xlsx. The model should be saved in the models directory.
-
-"""
 import torch
 import torch.nn as nn
 import torch.nn.functional as F

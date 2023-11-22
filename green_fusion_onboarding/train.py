@@ -119,7 +119,7 @@ def main():
     num_classes_description = get_number_of_classes(train_df['description'])
 
     train_embeddings = torch.tensor(train_df['embeddings'].tolist())
-    test_embeddings = torch.tensor(test_df['embeddings'].tolist())
+    # test_embeddings = torch.tensor(test_df['embeddings'].tolist())
 
     train_measurement_label, test_measurement_label = one_hot_encode(train_df['measurement'], test_df['measurement'])
     train_location_label, test_location_label = one_hot_encode(train_df['location'], test_df['location'])

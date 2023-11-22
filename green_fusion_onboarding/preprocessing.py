@@ -6,7 +6,8 @@ import config
 def convert_list_to_categorical(acronym_list: list[str]) -> tuple[str, str, str]:
     """
     Converts a list of acronyms into a tuple of strings,
-    the first 2 strings in the list get mapped to the first 2 values in the tuple and the remaining strings in the list are joined with a spaced and mapped to the 3rd value in the tuple.
+    the first 2 strings in the list get mapped to the first 2 values in the tuple and the remaining strings in
+    the list are joined with a spaced and mapped to the 3rd value in the tuple.
     :param acronym_list: list of acronyms
     :return: tuple of strings
     """
@@ -155,5 +156,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
