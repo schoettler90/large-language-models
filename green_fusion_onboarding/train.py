@@ -113,8 +113,6 @@ def main():
     data_path = config.EMBEDDINGS_DATA_PATH
     train_df, test_df = load_and_split_data(data_path)
 
-    print(train_df.head())
-
     get_number_of_classes = (lambda x: len(x.unique()))
     num_classes_measurement = get_number_of_classes(train_df['measurement'])
     num_classes_location = get_number_of_classes(train_df['location'])
@@ -126,18 +124,6 @@ def main():
     train_measurement_label, test_measurement_label = one_hot_encode(train_df['measurement'], test_df['measurement'])
     train_location_label, test_location_label = one_hot_encode(train_df['location'], test_df['location'])
     train_description_label, test_description_label = one_hot_encode(train_df['description'], test_df['description'])
-
-    print("Shapes:")
-    print(train_embeddings.shape)
-    print(test_embeddings.shape)
-    print(train_measurement_label.shape)
-    print(test_measurement_label.shape)
-    print(train_location_label.shape)
-    print(test_location_label.shape)
-    print(train_description_label.shape)
-    print(test_description_label.shape)
-
-    # test_embeddings, test_measurement_label, test_location_label, test_description_label = convert_to_tensors(test_df)
 
     input_dim = train_embeddings.shape[1]
 

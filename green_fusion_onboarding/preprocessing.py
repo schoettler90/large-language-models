@@ -150,7 +150,6 @@ def main():
     data.to_csv(config.CLEAN_DATA_PATH, index=False)
     data.to_pickle("data/sensors_cleaned.pkl")
 
-    print(data.head())
     print("Data saved to: ", config.CLEAN_DATA_PATH)
 
 

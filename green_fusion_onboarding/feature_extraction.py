@@ -71,7 +71,6 @@ def main():
     df.to_pickle(config.EMBEDDINGS_DATA_PATH)
     df.to_csv('data/sensors_embeddings.csv')
 
-    print(df.head())
     print("Data saved to: ", config.EMBEDDINGS_DATA_PATH)
 
 
