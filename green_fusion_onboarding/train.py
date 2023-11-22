@@ -5,16 +5,17 @@ from sklearn.preprocessing import OneHotEncoder
 import torch
 
 from ThreeHeadClassifier import ThreeHeadClassifier
+import config
 
 # set the device to cuda if available
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-HIDDEN_DIM = 256
-LEARNING_RATE = 1e-3
-NUM_EPOCHS = 100
-BATCH_SIZE = 64
-DROPOUT = 0.2
-WEIGHT_DECAY = 1e-2
+HIDDEN_DIM = config.HIDDEN_DIM
+LEARNING_RATE = config.LEARNING_RATE
+NUM_EPOCHS = config.NUM_EPOCHS
+BATCH_SIZE = config.BATCH_SIZE
+DROPOUT = config.DROPOUT
+WEIGHT_DECAY = config.WEIGHT_DECAY
 
 
 def load_and_split_data(data_path, test_size=0.2, random_state=42):
@@ -94,20 +95,22 @@ def fit(
 
             # Print the loss every 5 epochs
             if epoch == 1 and i == 0:
-                print(f"Epoch: {epoch}, Loss: {loss}")
+                print(f"Epoch: {epoch}, Loss 1: {loss1: .2f}, Loss 2: {loss2: .2f}, Loss 3: {loss3: .2f},"
+                      f" Total loss: {loss}")
 
-            if epoch % 10 == 0:
-                if i == len(range(num_batches)) - 1:
-                    print(f"Epoch: {epoch}, Loss: {loss}")
+            if epoch % 10 == 0 and i == len(range(num_batches)) - 1:
+                print(f"Epoch: {epoch}, Loss 1: {loss1: .2f}, Loss 2: {loss2: .2f}, Loss 3: {loss3: .2f},"
+                      f" Total loss: {loss: .2f}")
 
-    # Save the model
-    torch.save(model.state_dict(), f"models/three_head_classifier.pt")
+    return model
 
 
 def main():
+    import config
+
     print("Device: ", DEVICE)
 
-    data_path = 'data/sensors_embeddings.pkl'
+    data_path = config.EMBEDDINGS_DATA_PATH
     train_df, test_df = load_and_split_data(data_path)
 
     print(train_df.head())
@@ -156,7 +159,7 @@ def main():
     # Define the optimizer
     optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
 
-    fit(
+    model = fit(
         model,
         train_embeddings,
         train_measurement_label,
@@ -167,6 +170,12 @@ def main():
         num_epochs=NUM_EPOCHS,
         batch_size=BATCH_SIZE,
     )
+
+    # Save the model
+    model_save_path = config.MODEL_SAVE_PATH
+    torch.save(model.state_dict(), model_save_path)
+
+    print("Model saved to: ", model_save_path)
 
 
 if __name__ == '__main__':
