@@ -5,7 +5,7 @@ from sklearn.preprocessing import OneHotEncoder
 
 import torch
 
-from ThreeHeadClassifier import ThreeHeadClassifier
+from MultiHeadClassifier import MultiHeadClassifier
 from LabelEncoder import LabelEncoder
 from preprocessing import get_target
 import config
@@ -260,7 +260,7 @@ def main():
     }
 
     # Initialize the model
-    model = ThreeHeadClassifier(
+    model = MultiHeadClassifier(
         **model_params,
     ).to(DEVICE)
 

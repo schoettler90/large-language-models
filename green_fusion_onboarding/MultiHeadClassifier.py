@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class ThreeHeadClassifier(nn.Module):
+class MultiHeadClassifier(nn.Module):
     def __init__(
             self,
             input_dim,
@@ -11,7 +11,7 @@ class ThreeHeadClassifier(nn.Module):
             heads_dims=(2, 2, 2),
             dropout=0.2
     ):
-        super(ThreeHeadClassifier, self).__init__()
+        super(MultiHeadClassifier, self).__init__()
 
         # MLP layer to reduce dimensionality
         self.mlp_layer1 = nn.Linear(input_dim, hidden_dim)
@@ -52,8 +52,12 @@ def main():
     num_classes_head2 = 2  # Adjust based on the actual number of classes for head 2
     num_classes_head3 = 3  # Adjust based on the actual number of classes for head 3
 
-    model = ThreeHeadClassifier(input_dim=embedding_dim, num_classes_head1=num_classes_head1,
-                                num_classes_head2=num_classes_head2, num_classes_head3=num_classes_head3)
+    model = MultiHeadClassifier(
+        input_dim=embedding_dim,
+        hidden_dim=256,
+        heads_dims=(num_classes_head1, num_classes_head2, num_classes_head3),
+        dropout=0.2,
+    )
 
     # Example forward pass
     input_embedding = torch.randn((1, embedding_dim))  # Example batch size of 64

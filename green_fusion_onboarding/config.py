@@ -12,7 +12,7 @@ ORIGINAL_DATA_PATH = 'data/sensors_example.xlsx'
 CLEAN_DATA_PATH = 'data/sensors_cleaned.pkl'
 EMBEDDINGS_DATA_PATH = 'data/sensors_embeddings.pkl'
 
-MODEL_SAVE_PATH = "models/three_head_classifier.pt"
+MODEL_SAVE_PATH = "models/multi_head_classifier.pt"
 
 # EMBEDDINGS MODEL PATHS
 ROBERTA = 'D:\models\multilingual-e5-large'
