@@ -1,3 +1,8 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # TRAINING
 HIDDEN_DIM = 256
 LEARNING_RATE = 1e-4
@@ -14,9 +19,10 @@ EMBEDDINGS_DATA_PATH = 'data/sensors_embeddings.pkl'
 
 MODEL_SAVE_PATH = "models/multi_head_classifier.pt"
 
-# EMBEDDINGS MODEL PATHS
-ROBERTA = 'D:\models\multilingual-e5-large'
-BERT = "D:\models\distilbert-base-german-cased"
+# TRANSFORMERS from env
+ROBERTA = os.getenv("ROBERTA")
+BERT = os.getenv("BERT")
+
 
 TRANSFORMER_PATH = ROBERTA
 
