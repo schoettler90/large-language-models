@@ -33,15 +33,15 @@ def get_embeddings(data: pd.DataFrame, model_name: str) -> pd.DataFrame:
     """
     input_texts = data['text'].tolist()
 
-    print("Number of input texts: ", len(input_texts))
+    print("Number of cases: ", len(input_texts))
 
     # Load the model
-
+    print("Loading the model: ", model_name)
     tokenizer = AutoTokenizer.from_pretrained(model_name, device_map=DEVICE)
     model = AutoModel.from_pretrained(model_name, device_map=DEVICE)
 
     # Tokenize the input texts
-    batch_dict = tokenizer(input_texts, max_length=512, padding=True, truncation=True, return_tensors='pt').to(DEVICE)
+    batch_dict = tokenizer(input_texts, max_length=64, padding=True, truncation=True, return_tensors='pt').to(DEVICE)
 
     # Get the embeddings
     outputs = model(**batch_dict)

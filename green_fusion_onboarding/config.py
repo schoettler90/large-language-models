@@ -1,10 +1,10 @@
 # TRAINING
-HIDDEN_DIM = 512
+HIDDEN_DIM = 256
 LEARNING_RATE = 1e-4
-NUM_EPOCHS = 200
-BATCH_SIZE = 32
+NUM_EPOCHS = 1000
+BATCH_SIZE = 8
 DROPOUT = 0.2
-WEIGHT_DECAY = 1e-3
+WEIGHT_DECAY = 1e-2
 
 
 # PATHS
@@ -18,7 +18,7 @@ MODEL_SAVE_PATH = "models/three_head_classifier.pt"
 ROBERTA = 'D:\models\multilingual-e5-large'
 BERT = "D:\models\distilbert-base-german-cased"
 
-TRANSFORMER_PATH = BERT
+TRANSFORMER_PATH = ROBERTA
 
 
 # PREPROCESSING MAPPINGS

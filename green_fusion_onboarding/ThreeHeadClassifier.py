@@ -8,9 +8,7 @@ class ThreeHeadClassifier(nn.Module):
             self,
             input_dim,
             hidden_dim=32,
-            num_classes_head1=2,
-            num_classes_head2=2,
-            num_classes_head3=2,
+            heads_dims=(2, 2, 2),
             dropout=0.2
     ):
         super(ThreeHeadClassifier, self).__init__()
@@ -22,6 +20,9 @@ class ThreeHeadClassifier(nn.Module):
         # dropout layer
         self.dropout1 = nn.Dropout(p=dropout)
         self.dropout2 = nn.Dropout(p=dropout)
+
+        # unpack heads dims
+        num_classes_head1, num_classes_head2, num_classes_head3 = heads_dims
 
         # Classification heads
         self.head1 = nn.Linear(hidden_dim, num_classes_head1)

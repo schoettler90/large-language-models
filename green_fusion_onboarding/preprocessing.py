@@ -104,6 +104,15 @@ def add_texts(node_id: str, name_cust: str, unit: str) -> str:
     return output
 
 
+def get_target(
+        measurement: str,
+        location: str,
+        description: str,
+) -> str:
+    output = f"{measurement}_{location}_{description}"
+    return output
+
+
 def main():
     df = pd.read_excel(config.ORIGINAL_DATA_PATH)
 
@@ -146,6 +155,9 @@ def main():
     data['measurement'] = data['measurement'].astype('category')
     data['location'] = data['location'].astype('category')
     data['description'] = data['description'].astype('category')
+
+    # final target: add measurement, location and description together
+    data['target'] = data.apply(lambda x: get_target(x['measurement'], x['location'], x['description']), axis=1)
 
     # save the cleaned data
     data.to_csv(config.CLEAN_DATA_PATH, index=False)
