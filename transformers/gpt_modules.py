@@ -562,6 +562,8 @@ def main():
     vocab_size = 8000
     max_seq_len = 1024
 
+    print("Device: ", DEVICE)
+
     print("Test attention mask")
     # create the input tensor of shape (batch_size, seq_len, embed_dim) as (1, 4, 6)
     x_mask = torch.randn((batch_size, 4, embed_dim))
