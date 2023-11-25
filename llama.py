@@ -7,7 +7,7 @@ from transformers import LlamaForCausalLM, LlamaTokenizer
 
 # Load the LLAMA 2 7B model
 load_dotenv()
-model_name = r"../models/Llama-2-7b-chat-hf"
+model_name = "D:\models\Llama-2-7b-chat-hf"
 access_token = os.getenv("HUGGINGFACE_WRITE")
 
 model = LlamaForCausalLM.from_pretrained(model_name, token=access_token, device_map="cuda:0")

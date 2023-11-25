@@ -40,12 +40,25 @@ def get_embeddings(data: pd.DataFrame, model_name: str) -> pd.DataFrame:
     tokenizer = AutoTokenizer.from_pretrained(model_name, device_map=DEVICE)
     model = AutoModel.from_pretrained(model_name, device_map=DEVICE)
 
+    # print model architecture
+    print(model)
+    # print number of parameters in millions
+    print(f"Number of parameters: {sum(p.numel() for p in model.parameters()) / 1e6:.2f}M")
+
     # Tokenize the input texts
     batch_dict = tokenizer(input_texts, max_length=64, padding=True, truncation=True, return_tensors='pt').to(DEVICE)
 
     # Get the embeddings
     outputs = model(**batch_dict)
     embeddings = utils.average_pool(outputs.last_hidden_state, batch_dict['attention_mask'])
+    # explain the above line
+    # outputs.last_hidden_state.shape = (batch_size, seq_len, hidden_dim)
+    # batch_dict['attention_mask'].shape = (batch_size, seq_len)
+    # outputs.last_hidden_state.masked_fill(~batch_dict['attention_mask'][..., None].bool(), 0.0)
+    # outputs.last_hidden_state.shape = (batch_size, seq_len, hidden_dim)
+    # outputs.last_hidden_state.sum(dim=1).shape = (batch_size, hidden_dim)
+    # outputs.last_hidden_state.sum(dim=1) / batch_dict['attention_mask'].sum(dim=1)[..., None].shape
+    # = (batch_size, hidden_dim)
 
     print("Embeddings:")
     print(embeddings.shape)

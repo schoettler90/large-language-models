@@ -100,7 +100,7 @@ def fit_multi_head_model(
         optimizer: torch.optim.Optimizer,
         num_epochs: int = 100,
         batch_size: int = 16,
-):
+) -> torch.nn.Module:
     # Calculate the number of batches
     num_batches = train_embeddings.shape[0] // batch_size
 
@@ -264,7 +264,10 @@ def main():
         **model_params,
     ).to(DEVICE)
 
+    # print model architecture
     print(model)
+    # print number of parameters in millions
+    print(f"Number of parameters: {sum(p.numel() for p in model.parameters()) / 1e6:.2f}M")
 
     # Define the loss function
     loss_fn = torch.nn.CrossEntropyLoss()
@@ -308,7 +311,7 @@ def evaluate(
         model: torch.nn.Module,
         test_df: pd.DataFrame,
         encoders: tuple[LabelEncoder, LabelEncoder, LabelEncoder]
-):
+) -> pd.DataFrame:
     # convert the embeddings to tensors
     test_embeddings = torch.tensor(test_df['embeddings'].tolist())
     test_targets = test_df['target'].tolist()

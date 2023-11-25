@@ -20,11 +20,11 @@ EMBEDDINGS_DATA_PATH = 'data/sensors_embeddings.pkl'
 MODEL_SAVE_PATH = "models/multi_head_classifier.pt"
 
 # TRANSFORMERS from env
-ROBERTA = os.getenv("ROBERTA")
+E5 = os.getenv("E5")
 BERT = os.getenv("BERT")
+DISTIL_BERT = os.getenv("DISTIL_BERT")
 
-
-TRANSFORMER_PATH = ROBERTA
+TRANSFORMER_PATH = E5
 
 
 # PREPROCESSING MAPPINGS
@@ -46,6 +46,6 @@ GENERAL_MAPPINGS = {
     "wmz": "wärmemengenzähler",
     "wwb": "wasserwerkbereiter",
     "hk": "heizkreis",
-    "temp": "temperatur",
+    "temp ": "temperatur",
     "nan": "nicht bekannt",
 }
