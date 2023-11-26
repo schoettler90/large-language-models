@@ -68,6 +68,10 @@ class PositionalEncoding(nn.Module):
         return output
 
 
+class RelativePositionalEncoding(nn.Module):
+    pass
+
+
 class Attention(nn.Module):
 
     def __init__(self):
@@ -100,12 +104,13 @@ class Attention(nn.Module):
 
         # compute the scaled dot product. QK^T / sqrt(dim)
         # (.., seq_len, head_dim) * (.., embed_dim, head_dim) -> (.., seq_len, seq_len)
-        scaled_dot_product = torch.matmul(query, key.transpose(-1, -2)) / (head_dim ** 0.5)
+        scaled_dot_product = torch.einsum('bhqd,bhkd->bhqk', query, key) / (head_dim ** 0.5)
+        # scaled_dot_product = torch.matmul(query, key.transpose(-1, -2)) / (head_dim ** 0.5)
 
         # apply the mask
         if mask is not None:
             # apply the mask to the scaled dot product. mask is broadcastable
-            # (.., seq_len, seq_len) + (.., seq_len, seq_len) -> (.., seq_len, seq_len)
+            # (.., seq_len, seq_len) + (.., seq_len, seq_len) -> (.., seq_len, seq_len
             scaled_dot_product = scaled_dot_product.masked_fill(mask == 0, -float('Inf'))
 
         # apply the softmax. shape: (batch_size, num_heads, seq_len, seq_len)
@@ -409,7 +414,13 @@ class GPT(nn.Module):
         """
         super(GPT, self).__init__()
 
+        self.vocab_size = vocab_size
         self.max_seq_len = max_seq_len
+        self.num_layers = num_layers
+        self.embed_dim = embed_dim
+        self.num_heads = num_heads
+        self.hidden_dim = hidden_dim
+        self.dropout = dropout
 
         # embedding layer
         self.embedding = nn.Embedding(vocab_size, embed_dim)
