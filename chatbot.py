@@ -4,7 +4,8 @@ from dotenv import load_dotenv
 import torch
 import transformers
 
-DEVICE = "cuda:0"
+# if cuda is available, use it
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 
 def load_and_generate():
@@ -15,7 +16,7 @@ def load_and_generate():
     # model_path = 'meta-llama/Llama-2-13b-chat-hf'
     model_path = r"../models/Llama-2-7b-chat-hf"
 
-    tokenizer = transformers.AutoTokenizer.from_pretrained(model_path, device_map="cuda:0", token=access_token)
+    tokenizer = transformers.AutoTokenizer.from_pretrained(model_path, device_map=DEVICE, token=access_token)
     model = transformers.AutoModelForCausalLM.from_pretrained(
         model_path,
         torch_dtype=torch.bfloat16,
@@ -32,8 +33,8 @@ def load_and_generate():
     output = model.generate(
         input_ids.cuda(),
         max_length=1000,
-        do_sample=True,
-        top_k=10,
+        do_sample=False,
+        top_k=1,
         num_return_sequences=1,
         pad_token_id=tokenizer.eos_token_id,
     )
@@ -82,7 +83,7 @@ def chat_with_model(model, tokenizer):
             break
 
         # Encode the user's input and generate a response
-        input_ids = tokenizer.encode(user_input, return_tensors="pt").cuda()
+        input_ids = tokenizer.encode(user_input, return_tensors="pt").to(DEVICE)
         output = model.generate(
             input_ids,
             max_length=1000,

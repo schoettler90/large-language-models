@@ -425,8 +425,8 @@ class GPT(nn.Module):
         # embedding layer
         self.embedding = nn.Embedding(vocab_size, embed_dim)
 
-        # positional encoding layer
-        self.positional_encoding = PositionalEncoding(embed_dim, max_seq_len=max_seq_len, dropout=dropout)
+        # positional embedding layer
+        self.positional_embedding = nn.Embedding(max_seq_len, embed_dim)
 
         # transformer decoder
         self.decoder = TransformerDecoder(num_layers, embed_dim, num_heads, hidden_dim, dropout)
@@ -487,26 +487,27 @@ class GPT(nn.Module):
 
         # apply the embedding layer
         # (batch_size, seq_len) -> (batch_size, seq_len, embed_dim)
-        output = self.embedding(x)
+        x = self.embedding(x)
 
-        # apply the positional encoding
-        # (batch_size, seq_len, embed_dim) -> (batch_size, seq_len, embed_dim)
-        output = self.positional_encoding(output)
+        # apply the positional embedding layer
+        # (batch_size, seq_len) -> (batch_size, seq_len, embed_dim)
+        positions = torch.arange(x.size(1), device=x.device).unsqueeze(0)
+        x = x + self.positional_embedding(positions)
 
         # get the attention mask
-        attention_mask = GPT.get_attention_mask(output).to(output.device)
+        attention_mask = GPT.get_attention_mask(x).to(x.device)
 
         # apply the transformer decoder
         # (batch_size, seq_len, embed_dim) -> (batch_size, seq_len, embed_dim)
-        output = self.decoder(output, attention_mask)
+        x = self.decoder(x, attention_mask)
 
         # apply the layer normalization
         # (batch_size, seq_len, embed_dim) -> (batch_size, seq_len, embed_dim)
-        output = self.layer_norm_final(output)
+        x = self.layer_norm_final(x)
 
         # apply the output layer
         # (batch_size, seq_len, embed_dim) -> (batch_size, seq_len, vocab_size)
-        logits = self.output_linear_layer(output)
+        logits = self.output_linear_layer(x)
 
         loss = None
         if targets is not None:
@@ -571,7 +572,7 @@ def main():
 
     num_layers = 32
     vocab_size = 8000
-    max_seq_len = 1024
+    max_seq_len = 512
 
     print("Device: ", DEVICE)
 
