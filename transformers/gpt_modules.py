@@ -104,13 +104,13 @@ class Attention(nn.Module):
 
         # compute the scaled dot product. QK^T / sqrt(dim)
         # (.., seq_len, head_dim) * (.., embed_dim, head_dim) -> (.., seq_len, seq_len)
-        scaled_dot_product = torch.einsum('bhqd,bhkd->bhqk', query, key) / (head_dim ** 0.5)
-        # scaled_dot_product = torch.matmul(query, key.transpose(-1, -2)) / (head_dim ** 0.5)
+        # scaled_dot_product = torch.einsum('bhqd,bhkd->bhqk', query, key) / (head_dim ** 0.5)
+        scaled_dot_product = torch.matmul(query, key.transpose(-1, -2)) / (head_dim ** 0.5)
 
         # apply the mask
         if mask is not None:
             # apply the mask to the scaled dot product. mask is broadcastable
-            # (.., seq_len, seq_len) + (.., seq_len, seq_len) -> (.., seq_len, seq_len
+            # (.., seq_len, seq_len) + (.., seq_len, seq_len) -> (.., seq_len, seq_len)
             scaled_dot_product = scaled_dot_product.masked_fill(mask == 0, -float('Inf'))
 
         # apply the softmax. shape: (batch_size, num_heads, seq_len, seq_len)
@@ -150,9 +150,9 @@ class MultiHeadAttention(nn.Module):
         self.num_heads = num_heads
 
         # linear layers for the query, key, and value
-        self.query_layer = nn.Linear(embed_dim, embed_dim)
-        self.key_layer = nn.Linear(embed_dim, embed_dim)
-        self.value_layer = nn.Linear(embed_dim, embed_dim)
+        self.query_layer = nn.Linear(embed_dim, embed_dim, bias=False)
+        self.key_layer = nn.Linear(embed_dim, embed_dim, bias=False)
+        self.value_layer = nn.Linear(embed_dim, embed_dim, bias=False)
 
         # attention layer
         self.attention = Attention()
@@ -319,11 +319,11 @@ class DecoderBlock(nn.Module):
 
         # apply the layer normalization
         # (batch_size, seq_len, embed_dim) -> (batch_size, seq_len, embed_dim)
-        normalized = self.layer_norm_pre_attention(x)
+        normed_x = self.layer_norm_pre_attention(x)
 
         # apply the multi-head attention layer for self-attention
         # (batch_size, seq_len, embed_dim) -> (batch_size, seq_len, embed_dim)
-        attention = self.multi_head_attention(normalized, normalized, normalized, attention_mask)
+        attention = self.multi_head_attention(normed_x, normed_x, normed_x, attention_mask)
 
         # add the residual connection
         # (batch_size, seq_len, embed_dim) + (batch_size, seq_len, embed_dim) -> (batch_size, seq_len, embed_dim)
@@ -331,11 +331,11 @@ class DecoderBlock(nn.Module):
 
         # apply the layer normalization
         # (batch_size, seq_len, embed_dim) -> (batch_size, seq_len, embed_dim)
-        normalized = self.layer_norm_post_attention(x)
+        normed_x = self.layer_norm_post_attention(x)
 
         # apply the position-wise feed-forward layer
         # (batch_size, seq_len, embed_dim) -> (batch_size, seq_len, embed_dim)
-        mlp_output = self.position_wise_feed_forward(normalized)
+        mlp_output = self.position_wise_feed_forward(normed_x)
 
         # add the residual connection
         # (batch_size, seq_len, embed_dim) + (batch_size, seq_len, embed_dim) -> (batch_size, seq_len, embed_dim)
