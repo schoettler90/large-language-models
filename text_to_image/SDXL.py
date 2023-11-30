@@ -3,7 +3,7 @@ import torch
 
 DEVICE = "cuda:0" if torch.cuda.is_available() else "cpu"
 
-example_prompt = "A picture of Berlin in Winter"
+example_prompt = "A looser playing Genshin Impact in his computer."
 
 
 def load_base_and_refiner(model_path=r"D:\models\stable-diffusion-xl-base-1.0"):
@@ -66,6 +66,9 @@ def main():
 
         # show image in new window
         image.show()
+
+        # save image
+        image.save("image.png")
 
 
 if __name__ == "__main__":
