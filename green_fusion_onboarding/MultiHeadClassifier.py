@@ -37,11 +37,13 @@ class MultiHeadClassifier(nn.Module):
         x = self.dropout2(x)
 
         # Classification heads with softmax
+        # shape: (batch_size, num_classes)
         output1 = F.softmax(self.head1(x), dim=1)
         output2 = F.softmax(self.head2(x), dim=1)
         output3 = F.softmax(self.head3(x), dim=1)
 
         return output1, output2, output3
+
 
 
 def main():

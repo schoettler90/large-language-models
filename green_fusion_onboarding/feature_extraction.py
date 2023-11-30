@@ -1,7 +1,14 @@
+import os
+
 import pandas as pd
 import torch
+from dotenv import load_dotenv
 from transformers import AutoTokenizer, AutoModel
-import utils
+
+import utils, config
+
+load_dotenv()
+access_token = os.getenv("HUGGINGFACE_WRITE")
 
 # set the device to cuda if available
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -37,8 +44,11 @@ def get_embeddings(data: pd.DataFrame, model_name: str) -> pd.DataFrame:
 
     # Load the model
     print("Loading the model: ", model_name)
-    tokenizer = AutoTokenizer.from_pretrained(model_name, device_map=DEVICE)
-    model = AutoModel.from_pretrained(model_name, device_map=DEVICE)
+    tokenizer = AutoTokenizer.from_pretrained(model_name, device_map=DEVICE, access_token=access_token)
+    model = AutoModel.from_pretrained(model_name, device_map=DEVICE, torch_dtype=torch.float16)
+
+    # put the model in evaluation mode
+    model.eval()
 
     # print model architecture
     print(model)
@@ -50,15 +60,7 @@ def get_embeddings(data: pd.DataFrame, model_name: str) -> pd.DataFrame:
 
     # Get the embeddings
     outputs = model(**batch_dict)
-    embeddings = utils.average_pool(outputs.last_hidden_state, batch_dict['attention_mask'])
-    # explain the above line
-    # outputs.last_hidden_state.shape = (batch_size, seq_len, hidden_dim)
-    # batch_dict['attention_mask'].shape = (batch_size, seq_len)
-    # outputs.last_hidden_state.masked_fill(~batch_dict['attention_mask'][..., None].bool(), 0.0)
-    # outputs.last_hidden_state.shape = (batch_size, seq_len, hidden_dim)
-    # outputs.last_hidden_state.sum(dim=1).shape = (batch_size, hidden_dim)
-    # outputs.last_hidden_state.sum(dim=1) / batch_dict['attention_mask'].sum(dim=1)[..., None].shape
-    # = (batch_size, hidden_dim)
+    embeddings = utils.average_pooling(outputs.last_hidden_state, batch_dict['attention_mask'])
 
     print("Embeddings:")
     print(embeddings.shape)
@@ -72,14 +74,94 @@ def get_embeddings(data: pd.DataFrame, model_name: str) -> pd.DataFrame:
     return data
 
 
+def encode_sentence_llm(input_text: str, model: torch.nn.Module, tokenizer) -> torch.Tensor:
+    """
+
+    :param input_text: input text with batch size of 1
+    :param model: large language model
+    :param tokenizer: tokenizer of the large language model
+    :return: tensor of shape (hidden_dim) with the embeddings
+    """
+
+    # Tokenize the input texts
+    input_ids = tokenizer(input_text, return_tensors="pt").to(DEVICE)
+
+    # Get the embeddings
+    output = model(**input_ids)
+
+    embeddings = utils.weighted_average_pool(output.last_hidden_state, input_ids['attention_mask'])
+
+    return embeddings.squeeze(0)
+
+
+def get_embeddings_llm(data: pd.DataFrame, model_name: str) -> pd.DataFrame:
+    """
+    Get the embeddings of the input texts
+    :param data: cleaned data with the text column
+    :param model_name: path or name to the model
+    :return:
+    """
+    input_texts = data['text'].tolist()
+
+    print("Number of cases: ", len(input_texts))
+
+    # Load the model
+    print("Loading the model: ", model_name)
+    tokenizer = AutoTokenizer.from_pretrained(
+        model_name,
+        device_map=DEVICE,
+        trust_remote_code=True,
+        token=access_token,
+    )
+
+    model = AutoModel.from_pretrained(
+        model_name,
+        torch_dtype=torch.bfloat16,
+        trust_remote_code=True,
+        device_map=DEVICE,
+        token=access_token,
+    )
+
+    # put the model in evaluation mode
+    model.eval()
+
+    # print model architecture
+    print(model)
+    # print number of parameters in millions
+    print(f"Number of parameters: {sum(p.numel() for p in model.parameters()) / 1e6:.2f}M")
+
+    # Get the embeddings
+    embeddings = []
+    for text in input_texts:
+        embedding = encode_sentence_llm(text, model, tokenizer)
+        print("Text: ", text)
+        print("Embeddings Shape: ", embedding.shape)
+        embeddings.append(embedding)
+
+    # convert list of tensors to tensor
+    embeddings = torch.stack(embeddings, dim=0)
+
+    print("Concatenated Embeddings Shape: ", embeddings.shape)
+
+    # save the embeddings in df
+    data['embeddings'] = embeddings.tolist()
+
+    return data
+
+
 def main():
-    import config
     clean_data_path = config.CLEAN_DATA_PATH
     model_name = config.TRANSFORMER_PATH
 
     clean_data = load_cleaned_data(clean_data_path)
 
-    df = get_embeddings(clean_data, model_name)
+    # get only the first 200 rows
+    clean_data = clean_data.iloc[:100, :]
+
+    if "Llama" in model_name or "SGPT" in model_name:
+        df = get_embeddings_llm(clean_data, model_name)
+    else:
+        df = get_embeddings(clean_data, model_name)
 
     df.to_pickle(config.EMBEDDINGS_DATA_PATH)
     df.to_csv('data/sensors_embeddings.csv')

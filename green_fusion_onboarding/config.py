@@ -23,8 +23,10 @@ MODEL_SAVE_PATH = "models/multi_head_classifier.pt"
 E5 = os.getenv("E5")
 BERT = os.getenv("BERT")
 DISTIL_BERT = os.getenv("DISTIL_BERT")
+SGPT = os.getenv("SGPT")
+LLAMA = os.getenv("LLAMA")
 
-TRANSFORMER_PATH = E5
+TRANSFORMER_PATH = LLAMA
 
 
 # PREPROCESSING MAPPINGS

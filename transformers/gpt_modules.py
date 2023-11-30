@@ -26,9 +26,6 @@ class PositionalEncoding(nn.Module):
         """
         super(PositionalEncoding, self).__init__()
 
-        # initialize dropout layer
-        self.dropout = nn.Dropout(dropout)
-
         # create the positional encoding matrix
         positional_encoding = torch.zeros(max_seq_len, embed_dim)
 
@@ -49,6 +46,9 @@ class PositionalEncoding(nn.Module):
 
         # register the buffer
         self.register_buffer('positional_encoding', positional_encoding)
+
+        # initialize dropout layer
+        self.dropout = nn.Dropout(dropout)
 
     def forward(self, x: torch.Tensor):
         """
@@ -111,7 +111,7 @@ class Attention(nn.Module):
         if mask is not None:
             # apply the mask to the scaled dot product. mask is broadcastable
             # (.., seq_len, seq_len) + (.., seq_len, seq_len) -> (.., seq_len, seq_len)
-            scaled_dot_product = scaled_dot_product.masked_fill(mask == 0, -float('Inf'))
+            scaled_dot_product = scaled_dot_product.masked_fill(mask == 0, float('-inf'))
 
         # apply the softmax. shape: (batch_size, num_heads, seq_len, seq_len)
         attention_weights = F.softmax(scaled_dot_product, dim=-1)
@@ -198,29 +198,29 @@ class MultiHeadAttention(nn.Module):
 
         # reshape the value tensor to (batch_size, num_heads, seq_len, head_dim) for the attention computation
         # (batch_size, seq_len, num_heads, head_dim) -> (batch_size, num_heads, seq_len, head_dim)
-        query = query.transpose(1, 2)
-        key = key.transpose(1, 2)
-        value = value.transpose(1, 2)
+        query = query.transpose(-2, -3)
+        key = key.transpose(-2, -3)
+        value = value.transpose(-2, -3)
 
         # compute the scaled dot product attention, attention is applied to all heads in parallel
         # attention is computed on the last two dimensions, seq_len and head_dim, the rest are broadcast
         # 3 x (batch_size, num_heads, seq_len, head_dim) -> (batch_size, num_heads, seq_len, head_dim)
-        attention = self.attention(query, key, value, mask)
+        output = self.attention(query, key, value, mask)
 
         # reshape the attention tensor to (batch_size, seq_len, num_heads, head_dim) for the concatenation
         # (batch_size, num_heads, seq_len, head_dim) -> (batch_size, seq_len, num_heads, head_dim)
-        attention = attention.transpose(1, 2)
+        output = output.transpose(1, 2)
 
         # reshape the attention tensor to (batch_size, seq_len, embed_dim)
         # (batch_size, seq_len, num_heads, head_dim) -> (batch_size, seq_len, embed_dim)
-        attention = attention.reshape(batch_size, seq_len, -1)
-
-        # apply the dropout
-        attention = self.dropout(attention)
+        output = output.reshape(batch_size, seq_len, -1)
 
         # apply the output layer
         # (batch_size, seq_len, embed_dim) -> (batch_size, seq_len, embed_dim)
-        output = self.output_layer(attention)
+        output = self.output_layer(output)
+
+        # apply the dropout
+        output = self.dropout(output)
 
         return output
 
@@ -431,10 +431,11 @@ class GPT(nn.Module):
         # transformer decoder
         self.decoder = TransformerDecoder(num_layers, embed_dim, num_heads, hidden_dim, dropout)
 
-        # linear layer for the output
-        self.output_linear_layer = nn.Linear(embed_dim, vocab_size, bias=False)
-
+        # layer normalization layer after the transformer decoder blocks
         self.layer_norm_final = nn.LayerNorm(embed_dim)
+
+        # linear layer for the output
+        self.classification_linear_layer = nn.Linear(embed_dim, vocab_size, bias=False)
 
     def load_pretrained_embeddings(self, embeddings: torch.Tensor):
         """
@@ -507,12 +508,13 @@ class GPT(nn.Module):
 
         # apply the output layer
         # (batch_size, seq_len, embed_dim) -> (batch_size, seq_len, vocab_size)
-        logits = self.output_linear_layer(x)
+        logits = self.classification_linear_layer(x)
 
         loss = None
         if targets is not None:
             # compute the loss
-            # (batch_size, seq_len, vocab_size) -> (batch_size, seq_len)
+            # logits: (batch_size, seq_len, vocab_size) -> (batch_size * seq_len , vocab_size)
+            # targets: (batch_size, seq_len) -> (batch_size * seq_len)
             loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1), ignore_index=-1)
 
         return logits, loss
@@ -546,7 +548,7 @@ class GPT(nn.Module):
             if top_k is not None:
                 # apply the top_k sampling
                 v, _ = torch.topk(logits, top_k)
-                logits = logits.masked_fill(logits < v[:, -1:], -float('Inf'))
+                logits = logits.masked_fill(logits < v[:, -1:], float('-inf'))
 
             # get the last token probabilities. shape: (batch_size, vocab_size)
             probs = F.softmax(logits, dim=-1)
@@ -565,12 +567,12 @@ class GPT(nn.Module):
 
 def main():
     # test attention mask
-    batch_size = 10
-    seq_len = 22
-    num_heads = 8
-    embed_dim = 1024
+    batch_size = 1
+    seq_len = 5
+    num_heads = 4
+    embed_dim = 32
 
-    num_layers = 32
+    num_layers = 16
     vocab_size = 8000
     max_seq_len = 512
 
