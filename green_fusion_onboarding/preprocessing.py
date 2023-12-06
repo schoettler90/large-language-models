@@ -160,8 +160,8 @@ def main():
     data['target'] = data.apply(lambda x: get_target(x['measurement'], x['location'], x['description']), axis=1)
 
     # save the cleaned data
-    data.to_csv(config.CLEAN_DATA_PATH, index=False)
-    data.to_pickle("data/sensors_cleaned.pkl")
+    data.to_csv("data/sensors_cleaned.csv", index=False)
+    data.to_pickle(config.CLEAN_DATA_PATH)
 
     print("Data saved to: ", config.CLEAN_DATA_PATH)
 

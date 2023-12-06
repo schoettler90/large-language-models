@@ -304,7 +304,7 @@ def main():
     )
 
     # store the evaluation results
-    eval_df.to_csv('data/evaluation_results.csv')
+    eval_df.to_csv(config.RESULTS_PATH, index=False)
 
 
 def evaluate(
