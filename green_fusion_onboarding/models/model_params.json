@@ -1,1 +1,1 @@
-{"input_dim": 4096, "hidden_dim": 256, "heads_dims": [7, 4, 13], "dropout": 0.2}
+{"input_dim": 1024, "hidden_dim": 256, "heads_dims": [12, 6, 20], "dropout": 0.2}
