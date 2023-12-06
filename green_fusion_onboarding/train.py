@@ -259,6 +259,13 @@ def main():
         'dropout': DROPOUT,
     }
 
+    training_params = {
+        'learning_rate': LEARNING_RATE,
+        'num_epochs': NUM_EPOCHS,
+        'batch_size': BATCH_SIZE,
+        'weight_decay': WEIGHT_DECAY,
+    }
+
     # Initialize the model
     model = MultiHeadClassifier(
         **model_params,
@@ -293,6 +300,10 @@ def main():
     # save the model parameters
     with open('models/model_params.json', 'w') as f:
         json.dump(model_params, f)
+
+    # save the training parameters
+    with open('models/training_params.json', 'w') as f:
+        json.dump(training_params, f)
 
     print("Model saved to: ", model_save_path)
 

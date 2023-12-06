@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # TRAINING PARAMETERS in training.py
-HIDDEN_DIM = 256
+HIDDEN_DIM = 512
 LEARNING_RATE = 1e-4
 NUM_EPOCHS = 1000
 BATCH_SIZE = 8
