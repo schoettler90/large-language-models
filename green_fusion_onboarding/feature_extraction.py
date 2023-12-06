@@ -155,9 +155,6 @@ def main():
 
     clean_data = load_cleaned_data(clean_data_path)
 
-    # get only the first 200 rows
-    clean_data = clean_data.iloc[:100, :]
-
     if "Llama" in model_name or "SGPT" in model_name:
         df = get_embeddings_llm(clean_data, model_name)
     else:
