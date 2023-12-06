@@ -27,10 +27,17 @@ RESULTS_PATH = 'data/results.csv'
 MODEL_SAVE_PATH = "models/multi_head_classifier.pt"
 
 # TRANSFORMERS from env. Main model is E5 until now
+
+# https://huggingface.co/intfloat/multilingual-e5-large
 E5 = os.getenv("E5")
+
+# https://huggingface.co/dbmdz/bert-base-german-uncased
 BERT = os.getenv("BERT")
+
+# https://huggingface.co/distilbert-base-german-cased
 DISTIL_BERT = os.getenv("DISTIL_BERT")
-SGPT = os.getenv("SGPT")
+
+# https://huggingface.co/meta-llama/Llama-2-7b-chat-hf
 LLAMA = os.getenv("LLAMA")
 
 TRANSFORMER_PATH = E5
