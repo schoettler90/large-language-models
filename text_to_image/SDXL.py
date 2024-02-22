@@ -3,7 +3,7 @@ import torch
 
 DEVICE = "cuda:0" if torch.cuda.is_available() else "cpu"
 
-example_prompt = "A looser playing Genshin Impact in his computer."
+example_prompt = "A bear sitting on a coffee shop table, looking at his MacBook."
 
 
 def load_base_and_refiner(model_path=r"D:\models\stable-diffusion-xl-base-1.0"):
