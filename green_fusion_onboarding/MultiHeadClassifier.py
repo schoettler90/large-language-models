@@ -45,7 +45,6 @@ class MultiHeadClassifier(nn.Module):
         return output1, output2, output3
 
 
-
 def main():
     # Example usage:
     # Assuming you have a sentence embedding 'input_embedding' with size (batch_size, embedding_dim)
