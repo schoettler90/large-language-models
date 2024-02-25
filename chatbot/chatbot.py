@@ -4,6 +4,8 @@ import torch
 import transformers
 from dotenv import load_dotenv
 
+load_dotenv()
+
 # if cuda is available, use it
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -11,19 +13,21 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 ACCESS_TOKEN = os.getenv("HUGGINGFACE_WRITE")
 
 # if the model is locally store, set an .env variable with the model name
-# MODEL_PATH = os.getenv("LLAMA", "meta-llama/Llama-2-7b-chat-hf")
-MODEL_PATH = os.getenv("GEMMA", "google/gemma-7b")
+MODEL_PATH = os.getenv("LLAMA", "meta-llama/Llama-2-7b-chat-hf")
+# MODEL_PATH = os.getenv("GEMMA", "google/gemma-7b")
 
 
 def load_model():
     load_dotenv()
 
     print("Loading model from: ", MODEL_PATH)
+    print("Access token:", ACCESS_TOKEN)
 
     tokenizer = transformers.AutoTokenizer.from_pretrained(
         MODEL_PATH,
         device_map=DEVICE,
         trust_remote_code=True,
+        use_auth_token=True,
         token=ACCESS_TOKEN)
 
     model = transformers.AutoModelForCausalLM.from_pretrained(
@@ -31,6 +35,7 @@ def load_model():
         torch_dtype=torch.bfloat16,
         trust_remote_code=True,
         device_map=DEVICE,
+        use_auth_token=True,
         token=ACCESS_TOKEN)
 
     print("Model:")
