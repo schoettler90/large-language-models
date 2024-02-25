@@ -1,8 +1,8 @@
 import os
-from dotenv import load_dotenv
 
 import torch
 import transformers
+from dotenv import load_dotenv
 
 # if cuda is available, use it
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -10,8 +10,6 @@ ACCESS_TOKEN = os.getenv("HUGGINGFACE_WRITE")
 
 MODEL_PATH = r"D:\models\Llama-2-7b-chat-hf"
 # MODEL_PATH = r"D:\models\Orca-2-7b"
-
-example_prompt = "Give me the recipe of spaghetti bolognese."
 
 
 def load_model():

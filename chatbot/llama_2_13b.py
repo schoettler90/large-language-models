@@ -1,7 +1,9 @@
 # Load model directly
 import os
+
 from dotenv import load_dotenv
 from transformers import AutoTokenizer, AutoModelForCausalLM
+
 load_dotenv()
 access_token = os.getenv("HUGGINGFACE_WRITE")
 tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-13b-hf", token=access_token, device_map="cpu")

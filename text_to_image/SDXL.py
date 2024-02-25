@@ -1,5 +1,5 @@
-from diffusers import DiffusionPipeline
 import torch
+from diffusers import DiffusionPipeline
 
 DEVICE = "cuda:0" if torch.cuda.is_available() else "cpu"
 

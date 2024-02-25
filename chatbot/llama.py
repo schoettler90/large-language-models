@@ -1,8 +1,6 @@
 import os
-from dotenv import load_dotenv
 
-import torch
-from transformers import AutoModel, AutoTokenizer
+from dotenv import load_dotenv
 from transformers import LlamaForCausalLM, LlamaTokenizer
 
 # Load the LLAMA 2 7B model

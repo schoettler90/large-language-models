@@ -4,8 +4,8 @@ This is a didactic implementation of the Transformer model, adapted from the ori
 The purpose is to show how the model works, and not to be used for training or inference.
 """
 import torch
-from torch import nn
 import torch.nn.functional as F
+from torch import nn
 
 # set the device
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
