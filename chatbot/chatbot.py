@@ -3,6 +3,7 @@ import os
 import torch
 import transformers
 from dotenv import load_dotenv
+import config
 
 load_dotenv()
 
@@ -10,33 +11,28 @@ load_dotenv()
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 # add your hugingface token to the environment variables
-ACCESS_TOKEN = os.getenv("HUGGINGFACE_WRITE")
+ACCESS_TOKEN = os.getenv("HUGGINGFACE_TOKEN")
 
-# if the model is locally store, set an .env variable with the model name
-MODEL_PATH = os.getenv("LLAMA", "meta-llama/Llama-2-7b-chat-hf")
-# MODEL_PATH = os.getenv("GEMMA", "google/gemma-7b")
+# Load the model from the config file
+MODEL_PATH = config.LLAMA
 
 
 def load_model():
     load_dotenv()
 
     print("Loading model from: ", MODEL_PATH)
-    print("Access token:", ACCESS_TOKEN)
 
+    # Load the model and tokenizer
     tokenizer = transformers.AutoTokenizer.from_pretrained(
         MODEL_PATH,
-        device_map=DEVICE,
-        trust_remote_code=True,
-        use_auth_token=True,
-        token=ACCESS_TOKEN)
+        token=ACCESS_TOKEN,
+    )
 
     model = transformers.AutoModelForCausalLM.from_pretrained(
         MODEL_PATH,
+        token=ACCESS_TOKEN,
         torch_dtype=torch.bfloat16,
-        trust_remote_code=True,
-        device_map=DEVICE,
-        use_auth_token=True,
-        token=ACCESS_TOKEN)
+    ).to(DEVICE)
 
     print("Model:")
     print(model)
@@ -47,8 +43,13 @@ def load_model():
 def chat_with_model(model, tokenizer):
     print("Welcome! You can start a conversation by typing your message, or type 'exit' to end the conversation.")
 
+    terminators = [
+        tokenizer.eos_token_id,
+        tokenizer.convert_tokens_to_ids("<|eot_id|>")
+    ]
+
     # initialize conversation
-    conversation = ""
+    conversation = "You are a helpful assistant, that answers questions precisely and informatively.\n"
 
     while True:
         user_input = input("You: ")
@@ -61,21 +62,23 @@ def chat_with_model(model, tokenizer):
         # add user input to conversation
         conversation += user_input + "\n"
 
-        # Encode the user's input and generate a response
         input_ids = tokenizer.encode(conversation, return_tensors="pt").to(DEVICE)
-        output = model.generate(
+
+        outputs = model.generate(
             input_ids,
-            max_length=1000,
+            max_new_tokens=256,
+            eos_token_id=tokenizer.eos_token_id,
             do_sample=True,
-            top_k=10,
-            num_return_sequences=1,
-            pad_token_id=tokenizer.eos_token_id,
+            temperature=0.9,
+            top_p=0.9,
         )
 
-        # Decode the model's response
-        response = tokenizer.decode(output[0], skip_special_tokens=True)
+        # get the last response
+        response = outputs[0][input_ids.shape[-1]:]
 
-        # Print the model's response
+        # decode and print only the last response
+        response = tokenizer.decode(response, skip_special_tokens=True)
+
         print("Model:", response)
 
         # add model response to conversation
