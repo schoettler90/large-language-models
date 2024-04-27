@@ -14,7 +14,7 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 ACCESS_TOKEN = os.getenv("HUGGINGFACE_TOKEN")
 
 # Load the model from the config file
-MODEL_PATH = config.LLAMA
+MODEL_PATH = config.gemma
 
 
 def load_model():
