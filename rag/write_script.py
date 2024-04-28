@@ -2,7 +2,7 @@ import os
 import PyPDF2
 import chromadb
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.embeddings import HuggingFaceEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 
 
 def pdf_to_text(file_path: str) -> str:
@@ -28,20 +28,28 @@ def main():
     """
     Main function to process PDFs in the ./documents directory and store them in Chroma DB
     """
+    import config
+
+
+    model_kwargs = {'device': config.device}
+    encode_kwargs = {'normalize_embeddings': False}
 
     # Initialize text splitter and embeddings
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
-    embeddings = HuggingFaceEmbeddings(model_name="BAAI/bge-large-en-v1.5", device="cuda")
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=200)
+    embeddings = HuggingFaceEmbeddings(model_name=config.embedding_model, model_kwargs=model_kwargs, encode_kwargs=encode_kwargs)
 
     # Initialize Chroma DB client
-    client = chromadb.PersistentClient(path="./db")
-    collection = client.create_collection(name="my_papers")
+    client = chromadb.PersistentClient(path=config.db_path)
+    collection = client.create_collection(name=config.database_name)
 
     # Process each PDF in the ./input directory
-    for filename in os.listdir('./documents'):
+    for filename in os.listdir(config.documents_path):
         if filename.endswith('.pdf'):
+
+            print(f"Processing {filename}")
+
             # Convert PDF to text
-            text = pdf_to_text(os.path.join('./input', filename))
+            text = pdf_to_text(os.path.join(config.documents_path, filename))
 
             # Split text into chunks
             chunks = text_splitter.split_text(text)

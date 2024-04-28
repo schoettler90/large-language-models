@@ -1,3 +1,4 @@
 !/fine-tune-classifier/data/sensors_example.xlsx
 
 *.pdf
+*.xml
