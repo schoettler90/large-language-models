@@ -1,6 +1,10 @@
+"""
+This file contains the configuration for the RAG model.
+"""
 
 device = "cuda"
 documents_path = r"./documents"
-db_path = r"./db"
-embedding_model = "BAAI/bge-large-en-v1.5"
-database_name = "my_papers"
+database_path = r"./db"
+collection_name = "my_papers"
+
+embedding_model = "Alibaba-NLP/gte-large-en-v1.5"

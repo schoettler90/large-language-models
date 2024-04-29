@@ -3,13 +3,13 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 import config
 
 # Initialize Chroma DB client
-client = chromadb.PersistentClient(path=config.db_path)
-collection = client.get_collection(name=config.database_name)
+client = chromadb.PersistentClient(path=config.database_path)
+collection = client.get_collection(name=config.collection_name)
 
-model_kwargs = {'device': config.device}
+model_kwargs = {'device': config.device, 'trust_remote_code': True}
 encode_kwargs = {'normalize_embeddings': False}
 
-# Initialize GPT4All embeddings
+# Initialize embeddings
 embeddings = HuggingFaceEmbeddings(
     model_name=config.embedding_model,
     model_kwargs=model_kwargs,

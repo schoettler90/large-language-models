@@ -31,7 +31,7 @@ def main():
     import config
 
 
-    model_kwargs = {'device': config.device}
+    model_kwargs = {'device': config.device, 'trust_remote_code': True}
     encode_kwargs = {'normalize_embeddings': False}
 
     # Initialize text splitter and embeddings
@@ -39,8 +39,8 @@ def main():
     embeddings = HuggingFaceEmbeddings(model_name=config.embedding_model, model_kwargs=model_kwargs, encode_kwargs=encode_kwargs)
 
     # Initialize Chroma DB client
-    client = chromadb.PersistentClient(path=config.db_path)
-    collection = client.create_collection(name=config.database_name)
+    client = chromadb.PersistentClient(path=config.database_path)
+    collection = client.create_collection(name=config.collection_name)
 
     # Process each PDF in the ./input directory
     for filename in os.listdir(config.documents_path):
