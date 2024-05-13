@@ -17,7 +17,7 @@ embeddings = HuggingFaceEmbeddings(
 )
 
 # Get user input
-query = "Search information about indexing optimization"
+query = "Search information about adaptive retrieval."
 
 # Convert query to vector representation
 query_vector = embeddings.embed_query(query)

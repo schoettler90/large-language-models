@@ -18,10 +18,6 @@ MODEL_PATH = config.gemma
 
 
 def load_model():
-    load_dotenv()
-
-    print("Loading model from: ", MODEL_PATH)
-
     # Load the model and tokenizer
     tokenizer = transformers.AutoTokenizer.from_pretrained(
         MODEL_PATH,
@@ -34,19 +30,16 @@ def load_model():
         torch_dtype=torch.bfloat16,
     ).to(DEVICE)
 
-    print("Model:")
-    print(model)
-
     return model, tokenizer
 
 
 def chat_with_model(model, tokenizer):
     print("Welcome! You can start a conversation by typing your message, or type 'exit' to end the conversation.")
 
-    terminators = [
+    """terminators = [
         tokenizer.eos_token_id,
         tokenizer.convert_tokens_to_ids("<|eot_id|>")
-    ]
+    ]"""
 
     # initialize conversation
     conversation = "You are a helpful assistant, that answers questions precisely and informatively.\n"
@@ -86,7 +79,13 @@ def chat_with_model(model, tokenizer):
 
 
 def run_chatbot():
+    print("Loading model from: ", MODEL_PATH)
+
     model, tokenizer = load_model()
+
+    print("Model:")
+    print(model)
+
     chat_with_model(model, tokenizer)
 
 
